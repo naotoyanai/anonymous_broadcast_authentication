@@ -8,7 +8,7 @@
 
 
 int N=5; /* Num. of devices */
-int User = 3; /* Num. of users */
+int User = 3; /* Num. of users in List */
 int sec_lev = 32;
 
 const char *command = {"Command Message"}; /* command for Auth*/
@@ -342,7 +342,7 @@ int main(int argc, char *argv[])
     for (j=0; j< N; j++){
         data_len = strlen(dev[j].keyy);
         HMAC(EVP_sha256(), key_temp, keylen, dev[j].keyy, data_len, out, &out_len);
-        printf("Gamma for %d:\n", j);
+        printf("%d: Gamma for %s:\n", j, dev[j].id);
         printDump(out, out_len, cmd[j].gamma);
         printf("\n");        
 
@@ -354,7 +354,7 @@ int main(int argc, char *argv[])
             keylen = strlen(dev[j].keyk);
 
             HMAC(EVP_sha256(), dev[j].keyk, keylen, cmd_tmp, data_len, out, &out_len);
-            printf("Tau for %d in List:\n", j);
+            printf("%d: Tau for %s in List:\n", j, dev[j].id);
             printDump(out, out_len, cmd[j].tau);
             printf("\n");        
         } else {
@@ -366,11 +366,11 @@ int main(int argc, char *argv[])
 
 
             HMAC(EVP_sha256(), dev[j].keyk, keylen, cmd_tmp, data_len, out, &out_len);
-            printf("Tau for %d not in List:\n", j);
+            printf("%d: Tau for %s not in List:\n", j, dev[j].id);
             printDump(out, out_len,cmd[j].tau);
-            printf("\n\n");        
-
+            printf("\n");        
         }
+        printf("\n");        
     }
 
 
