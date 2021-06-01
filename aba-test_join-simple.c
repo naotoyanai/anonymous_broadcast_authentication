@@ -205,19 +205,21 @@ int main(int argc, char *argv[])
 
     /* Generation of device name */
         rand_text(name_len, dev[i].id);
-/*        printf("test 0\n"); // for debug */
-
-        printf("device name  %d:", i);
-        for (j = 0; j < strlen(dev[i].id); j++) {
-            printf("%x", dev[i].id[j]);
-        }
-        printf("\n");
-
         printf("device name  %d:", i);
         for (j = 0; j < strlen(dev[i].id); j++) {
             printf("%c", dev[i].id[j]);
         }
         printf("\n");
+
+
+        /*
+        printf("device name  %d:", i);
+        for (j = 0; j < strlen(dev[i].id); j++) {
+            printf("%x", dev[i].id[j]);
+        }
+        printf("\n");
+    */
+
 
     /* copy from dev[i] to dev[i]||0*/
         name_gen0(dev[i].name0, dev[i].id);
@@ -227,13 +229,13 @@ int main(int argc, char *argv[])
             printf("%c", dev[i].name0[j]);
         }
         printf("\n");
-/*
+        /*
         printf("device name||0  %d:", i);
         for (j = 0; j < sizeof(dev[i].name0); j++) {
             printf("%x", dev[i].name0[j]);
         }
         printf("\n");
-*/
+    */
 
 
 
@@ -246,13 +248,13 @@ int main(int argc, char *argv[])
         }
         printf("\n");
 
-/*
+        /*
         printf("device name||1  %d:", i);
         for (j = 0; j < sizeof(dev[i].name1); j++) {
             printf("%x", dev[i].name1[j]);
         }
         printf("\n");
-*/
+    */
 
     /* Generation of key r_id */
         data_len = strlen(dev[i].name0);
@@ -262,14 +264,14 @@ int main(int argc, char *argv[])
         printf("key rid c:\n");
         printDump(out, out_len, dev[i].keyr);
         printf("\n");
-/*
+        /*
         printf("key rid x:\n");
         for (j = 0; j < sizeof(out); j++) {
             printf("%x", out[i]);
             dev[i].keyr[j] = out[j];
         }
         printf("\n");
-*/
+    */
 
 
     /* Generation of key K_id */
@@ -279,57 +281,39 @@ int main(int argc, char *argv[])
         printDump(out, out_len, dev[i].keyk);
         printf("\n");
 
-/*        
+    /*        
         printf("key Kid x:\n");
         for (j = 0; j < sizeof(out); j++) {
             printf("%x", out[i]);
             dev[i].keyk[j] = out[j];
         }
         printf("\n");
-*/
+    */
 
         
-        /* Generation of key y_id */
-
+    /* Generation of key y_id */
         data_len = strlen(dev[i].name1);
         HMAC(EVP_sha256(), key, keylen, dev[i].name1, data_len, out, &out_len);
-        /*    HMAC(EVP_sha256(), key, keylen, data, data_len, out, &out_len);*/
-/*
+        printf("key yid c:\n");
+        printDump(out, out_len, dev[i].keyy);
+    /*
         printf("key yid x:\n");
         for (j = 0; j < sizeof(out); j++) {
             printf("%x", out[i]);
             dev[i].keyy[j] = out[j];
         }
         printf("\n");
-*/
-        printf("key yid c:\n");
-        printDump(out, out_len, dev[i].keyy);
+    */
 
-
-/*
-        for (j = 0; j < sizeof(out); j++) {
-            printf("%c", out[i]);
-            dev[i].keyr[j] = out[j];
-        }
-*/
         printf("\n\n"); 
 
     }
+
 /* Auth: process of HMAC */
 
+    /* Define cmd output from Auth*/
     struct command_info cmd[N];
     unsigned char cmd_tmp[sec_lev];
-
-    printf("%s\n", command);
-
-    /* temporal key \bar{k} */
-    char key_temp[EVP_MAX_MD_SIZE]; 
-    for (j=0; j < EVP_MAX_MD_SIZE; j++){
-            key_temp[j] = '\0';
-    }
-
-    
-    printf("ddd\n");
 
     for (i=0; i < N; i++){
         for (j = 0; j < sec_lev; j++){
@@ -341,11 +325,15 @@ int main(int argc, char *argv[])
         }
     }
 
-    printf("eee\n");
-
-
     for (j=0; j < sec_lev; j++){
         cmd_tmp[j]  = '\0';
+    }
+    printf("Command for Auth: %s\n", command);
+
+    /* temporal key \bar{k} */
+    char key_temp[EVP_MAX_MD_SIZE]; 
+    for (j=0; j < EVP_MAX_MD_SIZE; j++){
+            key_temp[j] = '\0';
     }
 
     key_gen(key_temp);
