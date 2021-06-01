@@ -6,9 +6,12 @@
 #include <openssl/opensslconf.h>
 #include <time.h>
 
+#include <sys/time.h>
+#include <sys/resource.h>
 
-int N=5; /* Num. of devices */
-int User = 3; /* Num. of users in List */
+
+int N=100; /* Num. of devices */
+int User = 20; /* Num. of users in List */
 int sec_lev = 32;
 
 const char *command = {"Command Message"}; /* command for Auth*/
@@ -154,7 +157,12 @@ int main(int argc, char *argv[])
     unsigned char digest[SHA256_DIGEST_LENGTH];
     int i, j; 
 
+    struct rusage setup_start, setup_end, join_start, join_end, 
+        auth_start, auth_end, vrfy_start, vrfy_end;
+
 /* setup */
+
+    getrusage(RUSAGE_SELF, &setup_start);
     /* master key = hmac key */
 	char    key[]   = "93f75ae483d03c23358fa5330ff4a3f5"; 
     size_t  keylen  = strlen (key);
@@ -163,6 +171,8 @@ int main(int argc, char *argv[])
     SHA256_Init(&sha_ctx); /* initialize ctx of sha*/
     SHA256_Update(&sha_ctx, message, sizeof(message)); /* input message */
     SHA256_Final(digest, &sha_ctx); /* output as digest */
+
+    getrusage(RUSAGE_SELF, &setup_end);
 
     printf("%s\n", message);
 
@@ -200,6 +210,8 @@ int main(int argc, char *argv[])
 	unsigned char out[EVP_MAX_MD_SIZE];
     unsigned int data_len, out_len = EVP_MAX_MD_SIZE;
     int name_len = 10; /* Device name length is here */
+
+    getrusage(RUSAGE_SELF, &join_start);
 
     for (i = 0; i < N; i++){
 
@@ -309,6 +321,9 @@ int main(int argc, char *argv[])
 
     }
 
+    getrusage(RUSAGE_SELF, &join_end);
+
+
 /* Auth: process of HMAC */
 
     /* Define cmd output from Auth*/
@@ -329,6 +344,9 @@ int main(int argc, char *argv[])
         cmd_tmp[j]  = '\0';
     }
     printf("Command for Auth: %s\n", command);
+
+    getrusage(RUSAGE_SELF, &auth_start);
+
 
     /* temporal key \bar{k} */
     char key_temp[EVP_MAX_MD_SIZE]; 
@@ -372,6 +390,9 @@ int main(int argc, char *argv[])
         }
         printf("\n");        
     }
+    
+    getrusage(RUSAGE_SELF, &auth_end);
+
 
 
 /* Verify: process of HMAC */
@@ -391,6 +412,8 @@ int main(int argc, char *argv[])
     }
 
 
+
+    getrusage(RUSAGE_SELF, &vrfy_start);
 
     
 
@@ -433,6 +456,9 @@ int main(int argc, char *argv[])
 
     }
 
+    getrusage(RUSAGE_SELF, &vrfy_end);
+
+
 
 
     for (int i = 0; i < sizeof(digest); ++i) {
@@ -448,6 +474,40 @@ int main(int argc, char *argv[])
         printf("%x", out[i]);
     }
     printf("\n");
+
+
+    /* Measurement Output */
+    printf("Num. of devices: %d\n", N);
+    printf("Num. of devices in List: %d\n", User);
+    printf("Num. of devices not in List: %d\n", N-User);
+
+    printf("Setup (user-time) \t%lfs\n",
+        (setup_end.ru_utime.tv_sec  - setup_start.ru_utime.tv_sec) +
+        (setup_end.ru_utime.tv_usec - setup_start.ru_utime.tv_usec)*1.0E-6);
+    printf("Setup (sys-time) \t%lfs\n",
+        (setup_end.ru_stime.tv_sec  - setup_start.ru_stime.tv_sec) +
+        (setup_end.ru_stime.tv_usec - setup_start.ru_stime.tv_usec)*1.0E-6);
+
+    printf("Join (user-time) \t%lfs\n",
+        (join_end.ru_utime.tv_sec  - join_start.ru_utime.tv_sec) +
+        (join_end.ru_utime.tv_usec - join_start.ru_utime.tv_usec)*1.0E-6);
+    printf("Join (sys-time) \t%lfs\n",
+        (join_end.ru_stime.tv_sec  - join_start.ru_stime.tv_sec) +
+        (join_end.ru_stime.tv_usec - join_start.ru_stime.tv_usec)*1.0E-6);
+
+    printf("Auth (user-time) \t%lfs\n",
+        (auth_end.ru_utime.tv_sec  - auth_start.ru_utime.tv_sec) +
+        (auth_end.ru_utime.tv_usec - auth_start.ru_utime.tv_usec)*1.0E-6);
+    printf("Auth (sys-time) \t%lfs\n",
+        (auth_end.ru_stime.tv_sec  - auth_start.ru_stime.tv_sec) +
+        (auth_end.ru_stime.tv_usec - auth_start.ru_stime.tv_usec)*1.0E-6);
+
+    printf("Verify (user-time) \t%lfs\n",
+        (vrfy_end.ru_utime.tv_sec  - vrfy_start.ru_utime.tv_sec) +
+        (vrfy_end.ru_utime.tv_usec - vrfy_start.ru_utime.tv_usec)*1.0E-6);
+    printf("Verify (sys-time) \t%lfs\n",
+        (vrfy_end.ru_stime.tv_sec  - vrfy_start.ru_stime.tv_sec) +
+        (vrfy_end.ru_stime.tv_usec - vrfy_start.ru_stime.tv_usec)*1.0E-6);
 
     
 
