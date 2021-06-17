@@ -8,8 +8,8 @@ We implemented ABA by utilizing **gcc 7.5.0** and **OpenSSL 1.1.1** on Ubuntu 18
 You need to install them. 
 
 ### List of Files
-`aba-test_join-simple.c`: scheme with the strong anonymity. 
-`aba-test_weak.c`: scheme with the weak anonymity. 
+1. `aba-test_join-simple.c` scheme with the strong anonymity. 
+2. `aba-test_weak.c` scheme with the weak anonymity. 
 
 ### Execute ABA
 1. Create clone of ABA onto your local.
