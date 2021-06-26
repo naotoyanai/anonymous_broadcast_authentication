@@ -5,7 +5,7 @@ This repository is a simple implementation of an anonymous broadcast authenticat
 
 ## Install Instruction
 We implemented ABA by utilizing **gcc 7.5.0** and **OpenSSL 1.1.1** on Ubuntu 18.04.5 LTS with Windows Subsyste for Linux. 
-You may need to install them. 
+You may need to install **libssl-dev 1.1.1**. 
 
 ### List of Files
 1. `aba-test_join-simple.c` scheme with the strong anonymity. 
