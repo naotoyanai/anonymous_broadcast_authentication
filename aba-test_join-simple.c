@@ -10,8 +10,8 @@
 #include <sys/resource.h>
 
 
-int N=100; /* Num. of devices */
-int User = 20; /* Num. of users in List */
+int N=10; /* Num. of devices */
+int User = 5; /* Num. of users in List */
 int sec_lev = 32;
 
 const char *command = {"Command Message"}; /* command for Auth*/
@@ -121,6 +121,32 @@ char* name_gen1(char* s1, const char* s2)
     return s1;
 }
 
+/* concatenation of counter */
+char* counter(char* s1, const char* s2, int ctr_in)
+{
+    int i, j;
+    int len = strlen(s2);
+    char s[16];
+
+    ctr_in = ctr_in +1;
+    snprintf(s, 16, "%x", ctr_in);
+
+
+    for(i=0 ; s2[i] != '\0'; i++)
+    {
+        s1[i] = s2[i];
+    }
+
+    for(j=0 ; j < 16; j++)
+    {
+        s1[i] = s[j];
+        i++;
+    }
+
+    s1[i+1] = s2[i];
+    return s1;
+}
+
 /* check strings for verification*/
 int check_strings(const char* s1, const char* s2)
 {
@@ -166,6 +192,7 @@ int main(int argc, char *argv[])
     /* master key = hmac key */
 	char    key[]   = "93f75ae483d03c23358fa5330ff4a3f5"; 
     size_t  keylen  = strlen (key);
+    int ctr = 0;
 
     SHA256_CTX sha_ctx;
     SHA256_Init(&sha_ctx); /* initialize ctx of sha*/
@@ -367,6 +394,8 @@ int main(int argc, char *argv[])
         if (j < User) {
             name_gen1(cmd_tmp, command);
             printf("%s\n", cmd_tmp);
+            counter(cmd_tmp, cmd_tmp, ctr);
+            printf("%s\n", cmd_tmp);
 
             data_len= strlen(cmd_tmp);
             keylen = strlen(dev[j].keyk);
@@ -377,6 +406,8 @@ int main(int argc, char *argv[])
             printf("\n");        
         } else {
             name_gen0(cmd_tmp, command);
+            printf("%s\n", cmd_tmp);
+            counter(cmd_tmp, cmd_tmp, ctr);
             printf("%s\n", cmd_tmp);
 
             data_len= strlen(cmd_tmp);
@@ -401,6 +432,7 @@ int main(int argc, char *argv[])
     unsigned char tau_temp[EVP_MAX_MD_SIZE];
     int ver_result[N];
     unsigned char ver_temp[sec_lev];
+    int ctr_ver = 0;
 
     for (j=0; j < sec_lev; j++){
             ver_temp[j] = '\0';
@@ -419,6 +451,9 @@ int main(int argc, char *argv[])
 
     for (j=0; j< N; j++){
         name_gen1(ver_temp, command_ver);
+        printf("%s\n", ver_temp);
+        counter(ver_temp, ver_temp, ctr_ver);
+
         printf("%s\n", ver_temp);
 
         keylen = strlen(key_temp);
