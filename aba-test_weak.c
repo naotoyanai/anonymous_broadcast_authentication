@@ -5,13 +5,16 @@
 #include <openssl/hmac.h>
 #include <openssl/opensslconf.h>
 #include <time.h>
+#include <openssl/evp.h>
+#include <openssl/aes.h>
+
 
 #include <sys/time.h>
 #include <sys/resource.h>
 
 
-int N=100; /* Num. of devices */
-int User = 20; /* Num. of users in List */
+int N=10; /* Num. of devices */
+int User = 5; /* Num. of users in List */
 int sec_lev = 32;
 
 const char *command = {"Command Message"}; /* command for Auth*/
@@ -58,11 +61,11 @@ struct device_info {
     char keyk[EVP_MAX_MD_SIZE]; /* key K_id */
 };
 
-/* definition of device info. */
+/* definition of auth info. */
 struct command_info {
-    unsigned char id[32];        /*  member: name */
-    char gamma[EVP_MAX_MD_SIZE]; /* auth gamma */
-    char tau[EVP_MAX_MD_SIZE]; /* auth tau */
+    unsigned char id[32];        /*  device name */
+    char gamma[EVP_MAX_MD_SIZE]; /* auth token gamma */
+    char tau[EVP_MAX_MD_SIZE]; /* auth token tau */
 };
 
 /* generation of random seed */
@@ -174,6 +177,68 @@ char* init(char* s1)
         s1[i] = '\0';
     }
     return s1;
+}
+*/
+
+/* Generation of Random Numbers via AES */
+unsigned int Random(const char* key, const char* data, const size_t datalen, const unsigned int i)
+{
+    EVP_CIPHER_CTX en;
+    int length = 16;
+    int c_len;
+    char string[32];
+    unsigned char* dest;
+    int num; 
+
+
+    //memset(dest, 0x00, destlen);
+
+    EVP_CIPHER_CTX_init(&en);
+
+    rand_text(length, string)
+
+    EVP_EncryptInit_ex(&en, EVP_aes_128_ecb(), NULL, (unsigned char*)key, NULL);
+
+    EVP_EncryptUpdate(&en, dest, &c_len, string, sizeof(string));
+
+    num = (int)dest % i;
+    //EVP_EncryptFinal_ex(&en, (unsigned char *)(dest + c_len), &f_len);
+
+    // PrintBytes(dest, destlen);
+
+    EVP_CIPHER_CTX_cleanup(&en);
+
+    return num;
+}
+
+/*
+unsigned char* Encrypt(const char* key, const char* data, const size_t datalen, const unsigned char* iv, unsigned char* dest, const size_t destlen)
+{
+    EVP_CIPHER_CTX en;
+    int i, f_len=0;
+    int c_len = destlen;
+
+
+    memset(dest, 0x00, destlen);
+
+
+    EVP_CIPHER_CTX_init(&en);
+    EVP_EncryptInit_ex(&en, EVP_aes_128_cbc(), NULL, (unsigned char*)key, iv);
+
+
+    EVP_EncryptUpdate(&en, dest, &c_len, (unsigned char *)data, datalen);
+    //EVP_EncryptFinal_ex(&en, (unsigned char *)(dest + c_len), &f_len);
+
+
+    printf("c_len: %d\n", c_len);
+    printf("f_len: %d\n", f_len);
+    PrintBytes(dest, destlen);
+
+
+    EVP_CIPHER_CTX_cleanup(&en);
+
+
+    return dest;
 }
 */
 
@@ -384,30 +449,30 @@ int main(int argc, char *argv[])
     key_gen(key_temp);
     keylen = strlen (key_temp);
 
-    for (j=0; j< User; j++){
+    for (j=0; j< N; j++){
         data_len = strlen(dev[j].keyy);
         HMAC(EVP_sha256(), key_temp, keylen, dev[j].keyy, data_len, out, &out_len);
         printf("%d: Gamma for %s:\n", j, dev[j].id);
         printDump(out, out_len, cmd[j].gamma);
         printf("\n");        
 
-            /* name_gen1(cmd_tmp, command); */
-        strcpy(cmd_tmp, command);
-        printf("%s\n", cmd_tmp);
-        counter(cmd_tmp, cmd_tmp, ctr);
-        printf("%s\n", cmd_tmp);
+        if (j < User) {
+            name_gen1(cmd_tmp, command);
+            printf("%s\n", cmd_tmp);
+            counter(cmd_tmp, cmd_tmp, ctr);
+            printf("%s\n", cmd_tmp);
 
+            data_len= strlen(cmd_tmp);
+            keylen = strlen(dev[j].keyk);
 
-        data_len= strlen(cmd_tmp);
-        keylen = strlen(dev[j].keyk);
-
-        HMAC(EVP_sha256(), dev[j].keyk, keylen, cmd_tmp, data_len, out, &out_len);
-        printf("%d: Tau for %s in List:\n", j, dev[j].id);
-        printDump(out, out_len, cmd[j].tau);
-        printf("\n");        
-         
-        /*else {
+            HMAC(EVP_sha256(), dev[j].keyk, keylen, cmd_tmp, data_len, out, &out_len);
+            printf("%d: Tau for %s in List:\n", j, dev[j].id);
+            printDump(out, out_len, cmd[j].tau);
+            printf("\n");        
+        } else {
             name_gen0(cmd_tmp, command);
+            printf("%s\n", cmd_tmp);
+            counter(cmd_tmp, cmd_tmp, ctr);
             printf("%s\n", cmd_tmp);
 
             data_len= strlen(cmd_tmp);
@@ -419,7 +484,6 @@ int main(int argc, char *argv[])
             printDump(out, out_len,cmd[j].tau);
             printf("\n");        
         }
-        */
         printf("\n");        
     }
     
@@ -444,8 +508,6 @@ int main(int argc, char *argv[])
         tau_temp[j] = '\0';
     }
 
-    printf("Command for Verify: %s\n", command);
-
 
 
     getrusage(RUSAGE_SELF, &vrfy_start);
@@ -453,16 +515,11 @@ int main(int argc, char *argv[])
     
 
     for (j=0; j< N; j++){
-        strcpy(ver_temp, command_ver);
-    /*
         name_gen1(ver_temp, command_ver);
-    */
         printf("%s\n", ver_temp);
-
         counter(ver_temp, ver_temp, ctr_ver);
 
         printf("%s\n", ver_temp);
-
 
         keylen = strlen(key_temp);
         data_len= strlen(dev[j].keyy);
