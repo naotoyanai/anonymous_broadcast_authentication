@@ -5,9 +5,6 @@
 #include <openssl/hmac.h>
 #include <openssl/opensslconf.h>
 #include <time.h>
-#include <openssl/evp.h>
-#include <openssl/aes.h>
-
 
 #include <sys/time.h>
 #include <sys/resource.h>
@@ -61,11 +58,11 @@ struct device_info {
     char keyk[EVP_MAX_MD_SIZE]; /* key K_id */
 };
 
-/* definition of auth info. */
+/* definition of device info. */
 struct command_info {
-    unsigned char id[32];        /*  device name */
-    char gamma[EVP_MAX_MD_SIZE]; /* auth token gamma */
-    char tau[EVP_MAX_MD_SIZE]; /* auth token tau */
+    unsigned char id[32];        /*  member: name */
+    char gamma[EVP_MAX_MD_SIZE]; /* auth gamma */
+    char tau[EVP_MAX_MD_SIZE]; /* auth tau */
 };
 
 /* generation of random seed */
@@ -177,68 +174,6 @@ char* init(char* s1)
         s1[i] = '\0';
     }
     return s1;
-}
-*/
-
-/* Generation of Random Numbers via AES */
-unsigned int Random(const char* key, const char* data, const size_t datalen, const unsigned int i)
-{
-    EVP_CIPHER_CTX en;
-    int length = 16;
-    int c_len;
-    char string[32];
-    unsigned char* dest;
-    int num; 
-
-
-    //memset(dest, 0x00, destlen);
-
-    EVP_CIPHER_CTX_init(&en);
-
-    rand_text(length, string)
-
-    EVP_EncryptInit_ex(&en, EVP_aes_128_ecb(), NULL, (unsigned char*)key, NULL);
-
-    EVP_EncryptUpdate(&en, dest, &c_len, string, sizeof(string));
-
-    num = (int)dest % i;
-    //EVP_EncryptFinal_ex(&en, (unsigned char *)(dest + c_len), &f_len);
-
-    // PrintBytes(dest, destlen);
-
-    EVP_CIPHER_CTX_cleanup(&en);
-
-    return num;
-}
-
-/*
-unsigned char* Encrypt(const char* key, const char* data, const size_t datalen, const unsigned char* iv, unsigned char* dest, const size_t destlen)
-{
-    EVP_CIPHER_CTX en;
-    int i, f_len=0;
-    int c_len = destlen;
-
-
-    memset(dest, 0x00, destlen);
-
-
-    EVP_CIPHER_CTX_init(&en);
-    EVP_EncryptInit_ex(&en, EVP_aes_128_cbc(), NULL, (unsigned char*)key, iv);
-
-
-    EVP_EncryptUpdate(&en, dest, &c_len, (unsigned char *)data, datalen);
-    //EVP_EncryptFinal_ex(&en, (unsigned char *)(dest + c_len), &f_len);
-
-
-    printf("c_len: %d\n", c_len);
-    printf("f_len: %d\n", f_len);
-    PrintBytes(dest, destlen);
-
-
-    EVP_CIPHER_CTX_cleanup(&en);
-
-
-    return dest;
 }
 */
 
