@@ -232,6 +232,16 @@ void swap(char* s1, char* s2) {
     }
 }
 
+
+/* swap command info from d1 to d2 */
+void struct_swap(struct command_info *c1, struct command_info *c2) {
+    struct command_info temp;
+    
+    temp = *c2;
+    *c2 = *c1;
+    *c1 = temp;
+}
+
 /*
 unsigned char* Encrypt(const char* key, const char* data, const size_t datalen, const unsigned char* iv, unsigned char* dest, const size_t destlen)
 {
@@ -443,7 +453,8 @@ int main(int argc, char *argv[])
     struct command_info cmd[N];
     unsigned char cmd_tmp[sec_lev];
 
-    char temp[EVP_MAX_MD_SIZE]; /* temp variable for sort */
+    int temp[User]; /* temp variable for sort */
+    int temp_rand, check; /* variable for sort*/
 
     for (i=0; i < N; i++){
         for (j = 0; j < sec_lev; j++){
@@ -498,6 +509,24 @@ int main(int argc, char *argv[])
             printf("\n");        
         } 
         printf("\n");        
+    }
+
+    for (j=0; j< User; j++){
+        LOOP:;/*ラベル*/
+        check = 0;
+        temp_rand = Random(User - j);
+        for (i=0; i<j; i++) {
+            if (temp[i] == temp_rand) {
+                check = 1;
+            }
+        }
+        if (check == 1){
+            goto LOOP;/*ラベルLOOPへ跳ぶ*/
+        }
+        temp[j] = temp_rand;
+
+        struct_swap (&cmd[temp_rand], &cmd[j]);
+        printf("device %d: --> %d\n", j, temp_rand);
     }
 
 
