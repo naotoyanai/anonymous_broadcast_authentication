@@ -222,6 +222,16 @@ unsigned int Random(const int i)
     return ran_num;
 }
 
+void swap(char* s1, char* s2) {
+    int i;
+    char c;
+    for(i = 0; i < EVP_MAX_MD_SIZE; i++) {
+        c = s1[i]; 
+        s1[i] = s2[i]; 
+        s2[i] = c; 
+    }
+}
+
 /*
 unsigned char* Encrypt(const char* key, const char* data, const size_t datalen, const unsigned char* iv, unsigned char* dest, const size_t destlen)
 {
@@ -433,6 +443,8 @@ int main(int argc, char *argv[])
     struct command_info cmd[N];
     unsigned char cmd_tmp[sec_lev];
 
+    char temp[EVP_MAX_MD_SIZE]; /* temp variable for sort */
+
     for (i=0; i < N; i++){
         for (j = 0; j < sec_lev; j++){
             cmd[i].id[j] = '\0';
@@ -441,6 +453,10 @@ int main(int argc, char *argv[])
             cmd[i].gamma[j] = '\0';
             cmd[i].tau[j] = '\0';
         }
+    }
+
+    for (j =0; j < EVP_MAX_MD_SIZE; j++){
+        temp[j] = '\0';
     }
 
     for (j=0; j < sec_lev; j++){
@@ -483,6 +499,8 @@ int main(int argc, char *argv[])
         } 
         printf("\n");        
     }
+
+
     
     getrusage(RUSAGE_SELF, &auth_end);
 
