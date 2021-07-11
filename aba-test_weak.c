@@ -180,35 +180,46 @@ char* init(char* s1)
 }
 */
 
+/* generatio of random numbers as string */
+char* rand_num_string(int length, char result[17]) {
+    int i, index;
+    const char char_set[] = "0123456789ABCDEF";
+ 
+    for (i = 0; i < length; i++) {
+        index = GetRandom(0,strlen(char_set) - 1);
+        result[i] = char_set[index];
+    }
+    return result;
+}
+
 /* Generation of Random Numbers via AES */
-unsigned int Random(const char* key, const char* data, const size_t datalen, const unsigned int i)
+unsigned int Random(const int i)
 {
-    EVP_CIPHER_CTX en;
+    EVP_CIPHER_CTX *en; 
+    en = EVP_CIPHER_CTX_new();
+
+    const char key[]   = "93f75ae483d03c233"; 
+
     int length = 16;
     int c_len;
-    char string[32];
-    unsigned char* dest;
-    int num; 
+    char string[17];
+    char dest[17];
 
+    rand_num_string(length, string);
 
-    //memset(dest, 0x00, destlen);
+    EVP_EncryptInit_ex(en, EVP_aes_128_ecb(), NULL, (unsigned char*)key, NULL);
 
-    EVP_CIPHER_CTX_init(&en);
+    EVP_EncryptUpdate(en, dest, &c_len, string, sizeof(string));
 
-    rand_text(length, string)
+    unsigned int ran_num = (unsigned int)dest;
+    ran_num = ran_num % i;
+    /* EVP_EncryptFinal_ex(&en, (unsigned char *)(dest + c_len), &f_len); */
 
-    EVP_EncryptInit_ex(&en, EVP_aes_128_ecb(), NULL, (unsigned char*)key, NULL);
+    /*  PrintBytes(dest, destlen); */
 
-    EVP_EncryptUpdate(&en, dest, &c_len, string, sizeof(string));
+    EVP_CIPHER_CTX_cleanup(en);
 
-    num = (int)dest % i;
-    //EVP_EncryptFinal_ex(&en, (unsigned char *)(dest + c_len), &f_len);
-
-    // PrintBytes(dest, destlen);
-
-    EVP_CIPHER_CTX_cleanup(&en);
-
-    return num;
+    return ran_num;
 }
 
 /*
@@ -469,21 +480,7 @@ int main(int argc, char *argv[])
             printf("%d: Tau for %s in List:\n", j, dev[j].id);
             printDump(out, out_len, cmd[j].tau);
             printf("\n");        
-        } else {
-            name_gen0(cmd_tmp, command);
-            printf("%s\n", cmd_tmp);
-            counter(cmd_tmp, cmd_tmp, ctr);
-            printf("%s\n", cmd_tmp);
-
-            data_len= strlen(cmd_tmp);
-            keylen = strlen(dev[j].keyk);
-
-
-            HMAC(EVP_sha256(), dev[j].keyk, keylen, cmd_tmp, data_len, out, &out_len);
-            printf("%d: Tau for %s not in List:\n", j, dev[j].id);
-            printDump(out, out_len,cmd[j].tau);
-            printf("\n");        
-        }
+        } 
         printf("\n");        
     }
     
