@@ -597,9 +597,17 @@ int main(int argc, char *argv[])
         */
         printf("%d: Verification of Gamma for %s:\n", j, dev[j].id);
         printDump(out, out_len, gamma_temp);
-        printf("\n");        
+        printf("\n");
 
-        if (check_strings(gamma_temp, cmd[j].gamma) == 0 ) {
+        i = 0;
+        do {
+            if (check_strings(gamma_temp, cmd[i].gamma) == 1){
+                break;
+            }
+            i++;
+        } while (i<N);
+
+        if (check_strings(gamma_temp, cmd[i].gamma) == 0 ) {
             printf("verify check 1\n");
             ver_result[j] = 0;
         } else {
@@ -610,7 +618,7 @@ int main(int argc, char *argv[])
             HMAC(EVP_sha256(), dev[j].keyk, keylen, ver_temp, data_len, out, &out_len);
             printDump(out, out_len, tau_temp);
             printf("\n"); 
-            if ( check_strings(tau_temp, cmd[j].tau) == 1) {
+            if ( check_strings(tau_temp, cmd[i].tau) == 1) {
                 printf("verify check 2\n");
                 ver_result[j] = 1;
             } else {
