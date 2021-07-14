@@ -13,8 +13,8 @@
 #include <sys/resource.h>
 
 
-int N=10; /* Num. of devices */
-int User = 5; /* Num. of users in List */
+int N=100; /* Num. of devices */
+int User = 10; /* Num. of users in List */
 int sec_lev = 32;
 
 const char *command = {"Command Message"}; /* command for Auth*/
@@ -599,7 +599,7 @@ int main(int argc, char *argv[])
         printDump(out, out_len, gamma_temp);
         printf("\n");
 
-        for (i=0; i< N; i++) {
+        for (i=0; i< User; i++) {
             if (check_strings(gamma_temp, cmd[i].gamma) == 1){
                 break;
             }
