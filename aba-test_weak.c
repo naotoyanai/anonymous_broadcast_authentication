@@ -207,7 +207,7 @@ unsigned int Random(const int i)
     EVP_CIPHER_CTX *en; 
     en = EVP_CIPHER_CTX_new();
 
-    const char key[]   = "93f75ae483d03c233"; 
+    const char key[]   = "13f75ae483d03c233"; 
 
     int length = 16;
     int c_len, j;
@@ -216,21 +216,23 @@ unsigned int Random(const int i)
 
 
     rand_num_string(length, string);
+    /*
     for (j = 0; j < sizeof(string); j++) {
         printf("%c", string[j]);
-    }
+    } for debug
     printf("\n");
+    */
 
     EVP_EncryptInit_ex(en, EVP_aes_128_ecb(), NULL, (unsigned char*)key, NULL);
 
     EVP_EncryptUpdate(en, dest, &c_len, string, sizeof(string));
-    printCipher(dest);
+    /* printCipher(dest); for debug */
 
     /* unsigned int ran_num = (unsigned int)dest;*/
     unsigned int ran_num = atoi(dest);
-    printf("debug for ran_num from AES: %d\n", ran_num);
+    /* printf("debug for ran_num from AES: %d\n", ran_num); */
     ran_num = ran_num % i;
-    printf("debug for ran_num for i: %d\n", ran_num);
+    /* printf("debug for ran_num for i: %d\n", ran_num); */
     /* EVP_EncryptFinal_ex(&en, (unsigned char *)(dest + c_len), &f_len); */
 
     /*  PrintBytes(dest, destlen); */
@@ -533,14 +535,14 @@ int main(int argc, char *argv[])
         LOOP:; /* loop point */
         check = 0;
         temp_rand = Random(User);
-        printf("\ntemp: %d\n", temp_rand);
+        /* printf("\ntemp: %d\n", temp_rand); */
         for (i=0; i<j; i++) {
             if (temp[i] == temp_rand) {
                 check = 1;
             }
         }
         if (check == 1){
-            printf("Device %d: %d\n", j, temp_rand); /* for debug */
+            /* printf("Device %d: %d\n", j, temp_rand); */ /* for debug */
             goto LOOP; /* goto LOOP for the retry*/
         }
         temp[j] = temp_rand;
