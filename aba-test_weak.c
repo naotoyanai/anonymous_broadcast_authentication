@@ -599,13 +599,13 @@ int main(int argc, char *argv[])
         printDump(out, out_len, gamma_temp);
         printf("\n");
 
-        i = 0;
-        do {
+        for (i=0; i< N; i++) {
             if (check_strings(gamma_temp, cmd[i].gamma) == 1){
                 break;
             }
-            i++;
-        } while (i<N);
+        }
+
+        printf("position of device %d: %d\n", j, i);
 
         if (check_strings(gamma_temp, cmd[i].gamma) == 0 ) {
             printf("verify check 1\n");
