@@ -31,6 +31,15 @@ static void printDump(const unsigned char *buff, int length, unsigned char *copy
     }
 }
 
+static void printCipher(const unsigned char *buff)
+{
+    int i;
+
+    for (i = 0; i < sizeof(buff); i++) {
+        printf("%02x", (buff[i] & 0x000000ff));
+    }
+}
+
 /*
 static void printDump(const unsigned char *buff, int length)
 {
@@ -181,7 +190,7 @@ char* init(char* s1)
 */
 
 /* generatio of random numbers as string */
-char* rand_num_string(int length, char result[17]) {
+char* rand_num_string(int length, char result[16]) {
     int i, index;
     const char char_set[] = "0123456789ABCDEF";
  
@@ -201,18 +210,27 @@ unsigned int Random(const int i)
     const char key[]   = "93f75ae483d03c233"; 
 
     int length = 16;
-    int c_len;
-    char string[17];
-    char dest[17];
+    int c_len, j;
+    char string[16];
+    char dest[16];
+
 
     rand_num_string(length, string);
+    for (j = 0; j < sizeof(string); j++) {
+        printf("%c", string[j]);
+    }
+    printf("\n");
 
     EVP_EncryptInit_ex(en, EVP_aes_128_ecb(), NULL, (unsigned char*)key, NULL);
 
     EVP_EncryptUpdate(en, dest, &c_len, string, sizeof(string));
+    printCipher(dest);
 
-    unsigned int ran_num = (unsigned int)dest;
+    /* unsigned int ran_num = (unsigned int)dest;*/
+    unsigned int ran_num = atoi(dest);
+    printf("debug for ran_num from AES: %d\n", ran_num);
     ran_num = ran_num % i;
+    printf("debug for ran_num for i: %d\n", ran_num);
     /* EVP_EncryptFinal_ex(&en, (unsigned char *)(dest + c_len), &f_len); */
 
     /*  PrintBytes(dest, destlen); */
@@ -512,21 +530,23 @@ int main(int argc, char *argv[])
     }
 
     for (j=0; j< User; j++){
-        LOOP:;/*ラベル*/
+        LOOP:; /* loop point */
         check = 0;
-        temp_rand = Random(User - j);
+        temp_rand = Random(User);
+        printf("\ntemp: %d\n", temp_rand);
         for (i=0; i<j; i++) {
             if (temp[i] == temp_rand) {
                 check = 1;
             }
         }
         if (check == 1){
-            goto LOOP;/*ラベルLOOPへ跳ぶ*/
+            printf("Device %d: %d\n", j, temp_rand); /* for debug */
+            goto LOOP; /* goto LOOP for the retry*/
         }
         temp[j] = temp_rand;
 
         struct_swap (&cmd[temp_rand], &cmd[j]);
-        printf("device %d: --> %d\n", j, temp_rand);
+        printf("device %d: --> %d (success)\n", j, temp_rand);
     }
 
 
