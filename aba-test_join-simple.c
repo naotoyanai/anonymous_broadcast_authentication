@@ -24,7 +24,7 @@ static void printDump(const unsigned char *buff, int length, unsigned char *copy
 
     for (i = 0; i < length; i++) {
         copy[i] = buff[i];
-        printf("%02x", (buff[i] & 0x000000ff));
+        /* printf("%02x", (buff[i] & 0x000000ff)); for debug */
     }
 }
 
@@ -201,12 +201,13 @@ int main(int argc, char *argv[])
 
     getrusage(RUSAGE_SELF, &setup_end);
 
-    printf("%s\n", message);
+    /* printf("%s\n", message); for debug 
 
     for (int i = 0; i < sizeof(digest); ++i) {
         printf("%x", digest[i]);
     }
     printf("\n");
+    */
 
 /* Join: process of HMAC */
 
@@ -244,11 +245,14 @@ int main(int argc, char *argv[])
 
     /* Generation of device name */
         rand_text(name_len, dev[i].id);
+
+        /* for debug 
         printf("device name  %d:", i);
         for (j = 0; j < strlen(dev[i].id); j++) {
             printf("%c", dev[i].id[j]);
         }
         printf("\n");
+        */
 
 
         /*
@@ -263,11 +267,13 @@ int main(int argc, char *argv[])
     /* copy from dev[i] to dev[i]||0*/
         name_gen0(dev[i].name0, dev[i].id);
 
+        /* for debug 
         printf("device name||0  %d:", i);
         for (j = 0; j < sizeof(dev[i].name0); j++) {
             printf("%c", dev[i].name0[j]);
         }
         printf("\n");
+        */
         /*
         printf("device name||0  %d:", i);
         for (j = 0; j < sizeof(dev[i].name0); j++) {
@@ -281,12 +287,13 @@ int main(int argc, char *argv[])
     /* copy from dev[i] to dev[i]||1*/
         name_gen1(dev[i].name1, dev[i].id);
         
+        /* for debug 
         printf("device name||1  %d:", i);
         for (j = 0; j < sizeof(dev[i].name1); j++) {
             printf("%c", dev[i].name1[j]);
         }
         printf("\n");
-
+        */
         /*
         printf("device name||1  %d:", i);
         for (j = 0; j < sizeof(dev[i].name1); j++) {
@@ -300,9 +307,12 @@ int main(int argc, char *argv[])
         keylen  = strlen (key);
         HMAC(EVP_sha256(), key, keylen, dev[i].name0, data_len, out, &out_len);
         /*    HMAC(EVP_sha256(), key, keylen, data, data_len, out, &out_len);*/
+        printDump(out, out_len, dev[i].keyr);
+        /* for debug 
         printf("key rid c:\n");
         printDump(out, out_len, dev[i].keyr);
         printf("\n");
+        */
         /*
         printf("key rid x:\n");
         for (j = 0; j < sizeof(out); j++) {
@@ -316,9 +326,12 @@ int main(int argc, char *argv[])
     /* Generation of key K_id */
         data_len = strlen(dev[i].keyr);
         HMAC(EVP_sha256(), key, keylen, dev[i].keyr, data_len, out, &out_len);
+        printDump(out, out_len, dev[i].keyk);
+        /* for debug 
         printf("key Kid c:\n");
         printDump(out, out_len, dev[i].keyk);
         printf("\n");
+        */
 
     /*        
         printf("key Kid x:\n");
@@ -333,8 +346,11 @@ int main(int argc, char *argv[])
     /* Generation of key y_id */
         data_len = strlen(dev[i].name1);
         HMAC(EVP_sha256(), key, keylen, dev[i].name1, data_len, out, &out_len);
+        printDump(out, out_len, dev[i].keyy);
+        /* for debug
         printf("key yid c:\n");
         printDump(out, out_len, dev[i].keyy);
+        */
     /*
         printf("key yid x:\n");
         for (j = 0; j < sizeof(out); j++) {
@@ -344,7 +360,9 @@ int main(int argc, char *argv[])
         printf("\n");
     */
 
+    /*
         printf("\n\n"); 
+    */
 
     }
 
@@ -369,8 +387,10 @@ int main(int argc, char *argv[])
 
     for (j=0; j < sec_lev; j++){
         cmd_tmp[j]  = '\0';
-    }
+    }       
+    /* 
     printf("Command for Auth: %s\n", command);
+    */
 
     getrusage(RUSAGE_SELF, &auth_start);
 
@@ -387,37 +407,52 @@ int main(int argc, char *argv[])
     for (j=0; j< N; j++){
         data_len = strlen(dev[j].keyy);
         HMAC(EVP_sha256(), key_temp, keylen, dev[j].keyy, data_len, out, &out_len);
+        printDump(out, out_len, cmd[j].gamma);
+        /* for debug 
         printf("%d: Gamma for %s:\n", j, dev[j].id);
         printDump(out, out_len, cmd[j].gamma);
         printf("\n");        
+        */
 
         if (j < User) {
+            name_gen1(cmd_tmp, command);
+            counter(cmd_tmp, cmd_tmp, ctr);
+            /* for debug
             name_gen1(cmd_tmp, command);
             printf("%s\n", cmd_tmp);
             counter(cmd_tmp, cmd_tmp, ctr);
             printf("%s\n", cmd_tmp);
+            */
 
             data_len= strlen(cmd_tmp);
             keylen = strlen(dev[j].keyk);
 
             HMAC(EVP_sha256(), dev[j].keyk, keylen, cmd_tmp, data_len, out, &out_len);
+            printDump(out, out_len, cmd[j].tau);
+            /* for debug
             printf("%d: Tau for %s in List:\n", j, dev[j].id);
             printDump(out, out_len, cmd[j].tau);
             printf("\n");        
+            */
         } else {
+            /* for debug 
             name_gen0(cmd_tmp, command);
             printf("%s\n", cmd_tmp);
             counter(cmd_tmp, cmd_tmp, ctr);
             printf("%s\n", cmd_tmp);
+            */
 
             data_len= strlen(cmd_tmp);
             keylen = strlen(dev[j].keyk);
 
 
             HMAC(EVP_sha256(), dev[j].keyk, keylen, cmd_tmp, data_len, out, &out_len);
+            printDump(out, out_len,cmd[j].tau);
+            /* for debug
             printf("%d: Tau for %s not in List:\n", j, dev[j].id);
             printDump(out, out_len,cmd[j].tau);
             printf("\n");        
+            */
         }
         printf("\n");        
     }
@@ -451,25 +486,29 @@ int main(int argc, char *argv[])
 
     for (j=0; j< N; j++){
         name_gen1(ver_temp, command_ver);
-        printf("%s\n", ver_temp);
+        /* for debug        printf("%s\n", ver_temp); */
         counter(ver_temp, ver_temp, ctr_ver);
 
-        printf("%s\n", ver_temp);
+        /* for debug        printf("%s\n", ver_temp); */
 
         keylen = strlen(key_temp);
         data_len= strlen(dev[j].keyy);
         
 
         HMAC(EVP_sha256(), key_temp, keylen, dev[j].keyy, data_len, out, &out_len);
+        printDump(out, out_len, gamma_temp);
         /*
         HMAC(EVP_sha256(), key_temp, keylen, dev[j].keyy, data_len, out, &out_len);
         */
+        
+        /* for debug
         printf("%d: Verification of Gamma for %s:\n", j, dev[j].id);
         printDump(out, out_len, gamma_temp);
         printf("\n");        
+        */
 
         if (check_strings(gamma_temp, cmd[j].gamma) == 0 ) {
-            printf("verify check 1\n");
+            /* printf("verify check 1\n"); for debug */
             ver_result[j] = 0;
         } else {
             keylen = strlen(dev[j].keyk);
@@ -480,14 +519,15 @@ int main(int argc, char *argv[])
             printDump(out, out_len, tau_temp);
             printf("\n"); 
             if ( check_strings(tau_temp, cmd[j].tau) == 1) {
-                printf("verify check 2\n");
+                /* for debug printf("verify check 2\n"); */
                 ver_result[j] = 1;
             } else {
                 ver_result[j] = 0;
             }
         }
-
+        /* for debug 
         printf("Device %d: Result %d\n\n", j, ver_result[j]);
+        */
 
     }
 
@@ -495,7 +535,7 @@ int main(int argc, char *argv[])
 
 
 
-
+    /* 
     for (int i = 0; i < sizeof(digest); ++i) {
         printf("%x", digest[i]);
     }
@@ -509,9 +549,11 @@ int main(int argc, char *argv[])
         printf("%x", out[i]);
     }
     printf("\n");
+    */
 
 
     /* Measurement Output */
+    printf("Command for Auth: %s\n", command);
     printf("Num. of devices: %d\n", N);
     printf("Num. of devices in List: %d\n", User);
     printf("Num. of devices not in List: %d\n", N-User);
