@@ -13,8 +13,8 @@
 #include <sys/resource.h>
 
 
-int N=100; /* Num. of devices */
-int User = 10; /* Num. of users in List */
+int N=10; /* Num. of devices */
+int User = 5; /* Num. of users in List */
 int sec_lev = 32;
 
 const char *command = {"Command Message"}; /* command for Auth*/
@@ -27,15 +27,6 @@ static void printDump(const unsigned char *buff, int length, unsigned char *copy
 
     for (i = 0; i < length; i++) {
         copy[i] = buff[i];
-        printf("%02x", (buff[i] & 0x000000ff));
-    }
-}
-
-static void printCipher(const unsigned char *buff)
-{
-    int i;
-
-    for (i = 0; i < sizeof(buff); i++) {
         printf("%02x", (buff[i] & 0x000000ff));
     }
 }
@@ -189,77 +180,35 @@ char* init(char* s1)
 }
 */
 
-/* generatio of random numbers as string */
-char* rand_num_string(int length, char result[16]) {
-    int i, index;
-    const char char_set[] = "0123456789ABCDEF";
- 
-    for (i = 0; i < length; i++) {
-        index = GetRandom(0,strlen(char_set) - 1);
-        result[i] = char_set[index];
-    }
-    return result;
-}
-
 /* Generation of Random Numbers via AES */
-unsigned int Random(const int i)
+unsigned int Random(const char* key, const char* data, const size_t datalen, const unsigned int i)
 {
-    EVP_CIPHER_CTX *en; 
-    en = EVP_CIPHER_CTX_new();
-
-    const char key[]   = "13f75ae483d03c233"; 
-
+    EVP_CIPHER_CTX en;
     int length = 16;
-    int c_len, j;
-    char string[16];
-    char dest[16];
+    int c_len;
+    char string[32];
+    unsigned char* dest;
+    int num; 
 
 
-    rand_num_string(length, string);
-    /*
-    for (j = 0; j < sizeof(string); j++) {
-        printf("%c", string[j]);
-    } for debug
-    printf("\n");
-    */
+    //memset(dest, 0x00, destlen);
 
-    EVP_EncryptInit_ex(en, EVP_aes_128_ecb(), NULL, (unsigned char*)key, NULL);
+    EVP_CIPHER_CTX_init(&en);
 
-    EVP_EncryptUpdate(en, dest, &c_len, string, sizeof(string));
-    /* printCipher(dest); for debug */
+    rand_text(length, string)
 
-    /* unsigned int ran_num = (unsigned int)dest;*/
-    unsigned int ran_num = atoi(dest);
-    /* printf("debug for ran_num from AES: %d\n", ran_num); */
-    ran_num = ran_num % i;
-    /* printf("debug for ran_num for i: %d\n", ran_num); */
-    /* EVP_EncryptFinal_ex(&en, (unsigned char *)(dest + c_len), &f_len); */
+    EVP_EncryptInit_ex(&en, EVP_aes_128_ecb(), NULL, (unsigned char*)key, NULL);
 
-    /*  PrintBytes(dest, destlen); */
+    EVP_EncryptUpdate(&en, dest, &c_len, string, sizeof(string));
 
-    EVP_CIPHER_CTX_cleanup(en);
+    num = (int)dest % i;
+    //EVP_EncryptFinal_ex(&en, (unsigned char *)(dest + c_len), &f_len);
 
-    return ran_num;
-}
+    // PrintBytes(dest, destlen);
 
-void swap(char* s1, char* s2) {
-    int i;
-    char c;
-    for(i = 0; i < EVP_MAX_MD_SIZE; i++) {
-        c = s1[i]; 
-        s1[i] = s2[i]; 
-        s2[i] = c; 
-    }
-}
+    EVP_CIPHER_CTX_cleanup(&en);
 
-
-/* swap command info from d1 to d2 */
-void struct_swap(struct command_info *c1, struct command_info *c2) {
-    struct command_info temp;
-    
-    temp = *c2;
-    *c2 = *c1;
-    *c1 = temp;
+    return num;
 }
 
 /*
@@ -473,9 +422,6 @@ int main(int argc, char *argv[])
     struct command_info cmd[N];
     unsigned char cmd_tmp[sec_lev];
 
-    int temp[User]; /* temp variable for sort */
-    int temp_rand, check; /* variable for sort*/
-
     for (i=0; i < N; i++){
         for (j = 0; j < sec_lev; j++){
             cmd[i].id[j] = '\0';
@@ -484,10 +430,6 @@ int main(int argc, char *argv[])
             cmd[i].gamma[j] = '\0';
             cmd[i].tau[j] = '\0';
         }
-    }
-
-    for (j =0; j < EVP_MAX_MD_SIZE; j++){
-        temp[j] = '\0';
     }
 
     for (j=0; j < sec_lev; j++){
@@ -527,31 +469,23 @@ int main(int argc, char *argv[])
             printf("%d: Tau for %s in List:\n", j, dev[j].id);
             printDump(out, out_len, cmd[j].tau);
             printf("\n");        
-        } 
+        } else {
+            name_gen0(cmd_tmp, command);
+            printf("%s\n", cmd_tmp);
+            counter(cmd_tmp, cmd_tmp, ctr);
+            printf("%s\n", cmd_tmp);
+
+            data_len= strlen(cmd_tmp);
+            keylen = strlen(dev[j].keyk);
+
+
+            HMAC(EVP_sha256(), dev[j].keyk, keylen, cmd_tmp, data_len, out, &out_len);
+            printf("%d: Tau for %s not in List:\n", j, dev[j].id);
+            printDump(out, out_len,cmd[j].tau);
+            printf("\n");        
+        }
         printf("\n");        
     }
-
-    for (j=0; j< User; j++){
-        LOOP:; /* loop point */
-        check = 0;
-        temp_rand = Random(User);
-        /* printf("\ntemp: %d\n", temp_rand); */
-        for (i=0; i<j; i++) {
-            if (temp[i] == temp_rand) {
-                check = 1;
-            }
-        }
-        if (check == 1){
-            /* printf("Device %d: %d\n", j, temp_rand); */ /* for debug */
-            goto LOOP; /* goto LOOP for the retry*/
-        }
-        temp[j] = temp_rand;
-
-        struct_swap (&cmd[temp_rand], &cmd[j]);
-        printf("device %d: --> %d (success)\n", j, temp_rand);
-    }
-
-
     
     getrusage(RUSAGE_SELF, &auth_end);
 
@@ -597,17 +531,9 @@ int main(int argc, char *argv[])
         */
         printf("%d: Verification of Gamma for %s:\n", j, dev[j].id);
         printDump(out, out_len, gamma_temp);
-        printf("\n");
+        printf("\n");        
 
-        for (i=0; i< User; i++) {
-            if (check_strings(gamma_temp, cmd[i].gamma) == 1){
-                break;
-            }
-        }
-
-        printf("position of device %d: %d\n", j, i);
-
-        if (check_strings(gamma_temp, cmd[i].gamma) == 0 ) {
+        if (check_strings(gamma_temp, cmd[j].gamma) == 0 ) {
             printf("verify check 1\n");
             ver_result[j] = 0;
         } else {
@@ -618,7 +544,7 @@ int main(int argc, char *argv[])
             HMAC(EVP_sha256(), dev[j].keyk, keylen, ver_temp, data_len, out, &out_len);
             printDump(out, out_len, tau_temp);
             printf("\n"); 
-            if ( check_strings(tau_temp, cmd[i].tau) == 1) {
+            if ( check_strings(tau_temp, cmd[j].tau) == 1) {
                 printf("verify check 2\n");
                 ver_result[j] = 1;
             } else {
