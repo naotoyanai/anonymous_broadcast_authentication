@@ -9,7 +9,7 @@ You may need to install **libssl-dev 1.1.1**.
 
 ### List of Files
 1. `aba-strong.c` scheme with the strong anonymity. 
-2. `aba-test_weak.c` scheme with the weak anonymity. 
+2. `aba-weak.c` scheme with the weak anonymity. 
 
 ### Execute ABA
 1. Create clone of ABA onto your local.
