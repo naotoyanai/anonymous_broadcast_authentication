@@ -195,7 +195,7 @@ unsigned int Random(const char* key, const char* data, const size_t datalen, con
 
     EVP_CIPHER_CTX_init(&en);
 
-    rand_text(length, string)
+    rand_text(length, string);
 
     EVP_EncryptInit_ex(&en, EVP_aes_128_ecb(), NULL, (unsigned char*)key, NULL);
 
