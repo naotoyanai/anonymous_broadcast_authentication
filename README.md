@@ -13,7 +13,7 @@ You may need to install **libssl-dev 1.1.1**.
 
 ### Execute ABA
 1. Create clone of ABA onto your local.
-2. Type `gcc aba-test_weak.c -lcrypto` or `gcc aba-test_join-simple.c -lcrypto`
+2. Type `gcc aba-weak.c -lcrypto -lm` or `gcc aba-strong.c -lcrypto`
 3. Run an executable file output by gcc
 
 ## License
