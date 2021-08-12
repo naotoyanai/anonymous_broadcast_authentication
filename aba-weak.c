@@ -183,7 +183,8 @@ char* init(char* s1)
 /* Generation of Random Numbers via AES */
 unsigned int Random(const char* key, const char* data, const size_t datalen, const unsigned int i)
 {
-    EVP_CIPHER_CTX en;
+    EVP_CIPHER_CTX *en;
+    en = EVP_CIPHER_CTX_new();
     int length = 16;
     int c_len;
     char string[32];
