@@ -10,11 +10,14 @@ You may need to install **libssl-dev 1.1.1**.
 ### List of Files
 1. `aba-strong.c` scheme with the strong anonymity. 
 2. `aba-weak.c` scheme with the weak anonymity. 
+3. `aba-strong_wocounter.c` scheme with the strong anonymity (but not including a counter). 
+4. `aba-weak_wocounter.c` scheme with the weak anonymity (but not including a counter). 
 
 ### Execute ABA
 1. Create clone of ABA onto your local.
-2. Type `gcc aba-weak.c -lcrypto -lm` or `gcc aba-strong.c -lcrypto`
-3. Run an executable file output by gcc
+2. Type `gcc aba-weak.c -lcrypto -lm` on `aba-weak.c` or `aba-weak_wocounter.c`
+3. Or `gcc aba-strong.c -lcrypto` on `aba-strong.c` or `aba-strong_wocounter.c`
+4. Run an executable file output by gcc
 
 ## License
 This project is distributed under the Apache License Version 2.0. Please refer to LICENSE.txt for details.
