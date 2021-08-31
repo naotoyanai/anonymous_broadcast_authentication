@@ -21,3 +21,6 @@ You may need to install **libssl-dev 1.1.1**.
 
 ## License
 This project is distributed under the Apache License Version 2.0. Please refer to LICENSE.txt for details.
+
+## Acknowledgement
+This code was developed under a contract of ``Research and development on IoT malware removal / make it non-functional technologies for effective use of the radio spectrum'' among ``Research and Development for Expansion of Radio Wave Resources (JPJ000254)'', which was supported by the Ministry of Internal Affairs and Communications, Japan.
