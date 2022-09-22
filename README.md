@@ -12,6 +12,8 @@ You may need to install **libssl-dev 1.1.1**.
 2. `aba-weak.c` scheme with the weak anonymity. 
 3. `aba-strong_wocounter.c` scheme with the strong anonymity (but not including a counter). 
 4. `aba-weak_wocounter.c` scheme with the weak anonymity (but not including a counter). 
+5. `aba-weak_woperm.c` scheme with the weak anonymity (but not including random permutation). 
+6. `aba-weak_wocounter_woperm.c` scheme with the weak anonymity (but not including a counter and random permutation). 
 
 ### Execute ABA
 1. Create clone of ABA onto your local.
